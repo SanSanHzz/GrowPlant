@@ -51,6 +51,12 @@ class PostgresUserRepository(UserRepository):
         model = result.scalar_one_or_none()
         return self._to_record(model) if model else None
 
+    async def get_by_username(self, username: str) -> UserRecord | None:
+        stmt = select(UserModel).where(UserModel.username == username)
+        result = await self._session.execute(stmt)
+        model = result.scalar_one_or_none()
+        return self._to_record(model) if model else None
+
     async def get_by_id(self, user_id: UUID) -> UserRecord | None:
         stmt = select(UserModel).where(UserModel.id == user_id)
         result = await self._session.execute(stmt)

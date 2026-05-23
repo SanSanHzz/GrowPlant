@@ -6,7 +6,6 @@ from fastapi.responses import RedirectResponse
 from src.api.middleware.auth import get_current_user_id
 from src.api.schemas.auth import (
     AuthStatusResponse,
-    LoginResponse,
     LogoutResponse,
     UserResponse,
 )
@@ -76,10 +75,9 @@ async def github_callback(code: str, state: str | None = None):
             )
 
     session_token = create_session_token(user.id)
-    return LoginResponse(
-        user=_user_to_response(user),
-        session_token=session_token,
-    )
+    from fastapi.responses import RedirectResponse
+    frontend_url = f"http://localhost:5173/?token={session_token}"
+    return RedirectResponse(url=frontend_url, status_code=302)
 
 
 @router.get("/status", response_model=AuthStatusResponse)
