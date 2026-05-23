@@ -82,4 +82,4 @@ Then open http://localhost:5173 and click "Connect with GitHub".
 | 🌿 Cannabis | seed → sprout → young → mature → bloomed | Fast-growing and vibrant |
 | 🍓 Fruit | seed → sprout → young → mature → bloomed | Bears fruit from your hard work |
 
-Growth thresholds: seed (0) → sprout (5) → young (15) → mature (30) → bloomed (50)
+Growth thresholds: seed (0) → sprout (5) → young (15) → mature (30) → bloomed (50).
