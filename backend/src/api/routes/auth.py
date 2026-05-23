@@ -1,7 +1,8 @@
+import logging
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import RedirectResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.api.middleware.auth import get_current_user_id
 from src.api.schemas.auth import (
@@ -20,6 +21,7 @@ from src.infrastructure.database.repositories.user_repository import (
     PostgresUserRepository,
 )
 
+logger = logging.getLogger("growplant.auth")
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 oauth_service = GitHubOAuthService()
 
@@ -39,18 +41,38 @@ async def github_login():
     import secrets
     state = secrets.token_urlsafe(16)
     url = oauth_service.get_authorization_url(state)
+    logger.info("Login redirect URL generated: %s...", url[:80])
     return RedirectResponse(url=url, status_code=302)
 
 
 @router.get("/github/callback")
-async def github_callback(code: str, state: str | None = None):
+async def github_callback(
+    request: Request,
+    code: str | None = None,
+    state: str | None = None,
+):
+    logger.info("Callback received. URL: %s", request.url)
+    logger.info("Query params: code=%s, state=%s", code, state)
+
     if not code:
-        raise HTTPException(status_code=400, detail="Missing authorization code")
+        logger.warning("No code in callback")
+        return HTMLResponse(
+            content="""<html><body>
+<p>No authorization code received.</p>
+<p><a href="http://localhost:5173">Go back to GrowPlant</a></p>
+</body></html>""",
+            status_code=200,
+        )
 
     try:
         result = await oauth_service.exchange_code(code)
+        logger.info("GitHub token exchange OK. User: %s", result.user.username)
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Token exchange failed: {e}")
+        logger.error("Token exchange failed: %s", e)
+        return RedirectResponse(
+            url=f"http://localhost:5173/?error=GitHub+token+exchange+failed:+{e}",
+            status_code=302,
+        )
 
     encrypted, nonce = encrypt_token(result.access_token)
 
@@ -61,6 +83,7 @@ async def github_callback(code: str, state: str | None = None):
         if existing:
             await repo.update_token(existing.id, encrypted, nonce)
             user = await repo.get_by_id(existing.id)
+            logger.info("Existing user updated: %s", user.username)
         else:
             user = await repo.create(
                 UserData(
@@ -73,11 +96,18 @@ async def github_callback(code: str, state: str | None = None):
                     github_connected_at=datetime.now(UTC),
                 )
             )
+            logger.info("New user created: %s", user.username)
+        await session.commit()
 
     session_token = create_session_token(user.id)
-    from fastapi.responses import RedirectResponse
-    frontend_url = f"http://localhost:5173/?token={session_token}"
-    return RedirectResponse(url=frontend_url, status_code=302)
+    logger.info("Session token created, redirecting to frontend")
+
+    return HTMLResponse(
+        content=f"""<html><body>
+<script>window.location.replace("http://localhost:5173/?token={session_token}");
+</script></body></html>""",
+        status_code=200,
+    )
 
 
 @router.get("/status", response_model=AuthStatusResponse)

@@ -3,6 +3,7 @@
     <div class="card" v-if="!checking">
       <h1 class="title">GrowPlant</h1>
       <p class="subtitle">Your GitHub contributions come to life</p>
+      <p v-if="error" class="error">{{ error }}</p>
       <LoginButton />
     </div>
     <div v-else class="loading">Authenticating...</div>
@@ -18,20 +19,22 @@ import { useUserStore } from "@/stores/userStore";
 const router = useRouter();
 const userStore = useUserStore();
 const checking = ref(false);
+const error = ref("");
 
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
+
+  const errMsg = params.get("error");
+  if (errMsg) {
+    error.value = decodeURIComponent(errMsg.replace(/\+/g, " "));
+    window.history.replaceState({}, "", "/");
+  }
+
   if (token) {
     localStorage.setItem("session_token", token);
-    window.history.replaceState({}, "", "/");
     checking.value = true;
-    const authenticated = await userStore.fetchStatus();
-    if (authenticated) {
-      router.push("/select-plant");
-    } else {
-      checking.value = false;
-    }
+    window.location.href = "/select-plant";
   }
 });
 </script>
@@ -53,6 +56,7 @@ onMounted(async () => {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
+  max-width: 480px;
 }
 .title {
   font-size: 2.5rem;
@@ -61,6 +65,12 @@ onMounted(async () => {
 .subtitle {
   color: var(--text-secondary);
   font-size: 1.125rem;
+}
+.error {
+  color: var(--danger);
+  font-size: 0.875rem;
+  text-align: center;
+  word-break: break-word;
 }
 .loading { color: var(--text-secondary); font-size: 1.25rem; }
 </style>

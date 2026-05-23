@@ -206,14 +206,14 @@ description: "Task list for GitHub Plant Gamification feature"
 
 **Independent Test**: Dashboard open → new commit pushed → water drop animation plays → counter increments.
 
-- [ ] T067 [US5] Create SSE endpoint at `backend/src/api/routes/events.py`:
+- [X] T067 [US5] Create SSE endpoint at `backend/src/api/routes/events.py`:
   - `GET /api/events/stream` — Server-Sent Events for authenticated user (sends `drop_received` and `stage_advanced` events)
-- [ ] T068 [US5] Publish events from arq worker after processing each webhook (publish to Redis pub/sub channel per user)
-- [ ] T069 [US5] Create frontend EventSource service in `frontend/src/services/eventService.ts` that connects to SSE stream and dispatches to stores
-- [ ] T070 [US5] Create WaterDrop animation component in `frontend/src/components/plant/WaterDrop.vue` (SVG droplet that falls and fades)
-- [ ] T071 [US5] Create StageTransition animation component in `frontend/src/components/plant/StageTransition.vue` (glow + morph between stages)
-- [ ] T072 [US5] Integrate WaterDrop + StageTransition into PlantCanvas with animation queue for sequential playback
-- [ ] T073 [US5] Add "max level" badge to PlantCanvas when plant reaches bloomed stage
+- [X] T068 [US5] Publish events from arq worker after processing each webhook (publish to Redis pub/sub channel per user)
+- [X] T069 [US5] Create frontend EventSource service in `frontend/src/services/eventService.ts` that connects to SSE stream and dispatches to stores
+- [X] T070 [US5] Create WaterDrop animation component in `frontend/src/components/plant/WaterDrop.vue` (SVG droplet that falls and fades)
+- [X] T071 [US5] Create StageTransition animation component in `frontend/src/components/plant/StageTransition.vue` (glow + morph between stages)
+- [X] T072 [US5] Integrate WaterDrop + StageTransition into PlantCanvas with animation queue for sequential playback
+- [X] T073 [US5] Add "max level" badge to PlantCanvas when plant reaches bloomed stage
 
 **Checkpoint**: SSE stream delivers events; drop animation plays on new commit; stage transition animates on growth.
 
@@ -221,14 +221,14 @@ description: "Task list for GitHub Plant Gamification feature"
 
 ### Polish & Cross-Cutting Concerns
 
-- [ ] T074 [P] Create backend unit tests for PlantGrowthService in `backend/tests/unit/test_plant_growth.py` (stage transitions, threshold logic, max stage)
-- [ ] T075 [P] Create backend unit tests for DripCalculationService in `backend/tests/unit/test_drip_calculation.py`
-- [ ] T076 [P] Create backend integration test for webhook ingestion → Redis queue → worker → DB in `backend/tests/integration/test_webhook_flow.py`
-- [ ] T077 [P] Create frontend component tests for PlantCanvas in `frontend/tests/unit/PlantCanvas.spec.ts`
-- [ ] T078 [P] Create frontend component tests for DropCounter in `frontend/tests/unit/DropCounter.spec.ts`
-- [ ] T079 Create E2E test with Playwright at `frontend/tests/e2e/auth-flow.spec.ts` (GitHub OAuth → plant select → dashboard)
-- [ ] T080 [P] Create README.md at root with project description, architecture overview, and setup instructions
-- [ ] T081 Run quickstart.md validation: verify `docker compose up` boots all services cleanly
+- [X] T074 [P] Create backend unit tests for PlantGrowthService in `backend/tests/unit/test_plant_growth.py` (stage transitions, threshold logic, max stage)
+- [X] T075 [P] Create backend unit tests for DripCalculationService in `backend/tests/unit/test_drip_calculation.py`
+- [X] T076 [P] Create backend integration test for webhook ingestion → Redis queue → worker → DB in `backend/tests/integration/test_webhook_flow.py`
+- [X] T077 [P] Create frontend component tests for PlantCanvas in `frontend/tests/unit/PlantCanvas.spec.ts`
+- [X] T078 [P] Create frontend component tests for DropCounter in `frontend/tests/unit/DropCounter.spec.ts`
+- [X] T079 Create E2E test with Playwright at `frontend/tests/e2e/auth-flow.spec.ts` (GitHub OAuth → plant select → dashboard)
+- [X] T080 [P] Create README.md at root with project description, architecture overview, and setup instructions
+- [X] T081 Run quickstart.md validation: verify `docker compose up` boots all services cleanly
 
 **Checkpoint**: All tests pass; `docker compose up` creates a fully working app.
 

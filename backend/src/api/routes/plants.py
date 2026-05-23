@@ -56,6 +56,8 @@ async def select_plant(
             )
 
         plant = await repo.create(uid, PlantTypeEnum(body.plant_type))
+        await session.commit()
+
         thresholds = PlantGrowthService.get_stage_thresholds(
             body.plant_type
         )

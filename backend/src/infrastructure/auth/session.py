@@ -18,12 +18,13 @@ _jwk = OctKey.import_key({"k": _derive_jwt_secret(), "kty": "oct"})
 
 def create_session_token(user_id: UUID) -> str:
     now = datetime.now(UTC)
+    header = {"alg": "HS256"}
     claims = {
         "sub": str(user_id),
         "iat": int(now.timestamp()),
         "exp": int((now + timedelta(days=7)).timestamp()),
     }
-    return jwt_encode(claims, _jwk)
+    return jwt_encode(header, claims, _jwk)
 
 
 def verify_session_token(token: str) -> UUID | None:
