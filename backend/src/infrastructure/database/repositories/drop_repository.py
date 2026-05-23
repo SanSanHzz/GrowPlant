@@ -28,14 +28,14 @@ class PostgresDropRepository(DropRepository):
     async def create(
         self,
         plant_id: UUID,
-        event_type: DropEventType,
+        event_type: str | DropEventType,
         source_repo: str,
         github_event_id: str,
         committed_at: object,
     ) -> Drop:
         model = DropModel(
             plant_id=plant_id,
-            event_type=event_type.value,
+            event_type=event_type.value if isinstance(event_type, DropEventType) else event_type,
             source_repo=source_repo,
             github_event_id=github_event_id,
             committed_at=committed_at,

@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 import httpx
 from authlib.integrations.httpx_client import AsyncOAuth2Client
 
@@ -18,12 +20,10 @@ class GitHubOAuthService(GitHubOAuthPort):
     def get_authorization_url(self, state: str) -> str:
         params = {
             "client_id": settings.github_client_id,
-            "redirect_uri": "http://localhost:8000/api/auth/github/callback",
             "scope": "read:user,public_repo",
             "state": state,
         }
-        query = "&".join(f"{k}={v}" for k, v in params.items())
-        return f"{self.AUTHORIZE_URL}?{query}"
+        return f"{self.AUTHORIZE_URL}?{urlencode(params)}"
 
     async def exchange_code(self, code: str) -> TokenExchangeResult:
         async with AsyncOAuth2Client(
@@ -33,7 +33,6 @@ class GitHubOAuthService(GitHubOAuthPort):
             token = await client.fetch_token(
                 self.TOKEN_URL,
                 code=code,
-                redirect_uri="http://localhost:8000/api/auth/github/callback",
             )
             access_token = token.get("access_token", "")
 
