@@ -13,9 +13,14 @@ export interface AuthStatus {
   user: User | null;
 }
 
+function headers(): Record<string, string> {
+  const token = localStorage.getItem("session_token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function getAuthStatus(): Promise<AuthStatus> {
   const res = await fetch(`${API_BASE}/auth/status`, {
-    credentials: "include",
+    headers: { ...headers(), "Content-Type": "application/json" },
   });
   if (!res.ok) return { authenticated: false, user: null };
   return res.json();
@@ -24,6 +29,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
 export async function logout(): Promise<void> {
   await fetch(`${API_BASE}/auth/logout`, {
     method: "POST",
-    credentials: "include",
+    headers: headers(),
   });
+  localStorage.removeItem("session_token");
 }

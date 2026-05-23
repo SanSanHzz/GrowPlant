@@ -115,25 +115,25 @@ description: "Task list for GitHub Plant Gamification feature"
 - [X] T033 [US3] Create DripCalculationService in `backend/src/core/services/drip_calculation.py` with `calculate_drops(events)` mapping commit events to drops
 - [X] T034 [US3] Create PlantRepository protocol in `backend/src/core/ports/plant_repository.py`
 - [X] T035 [P] [US3] Create DropRepository protocol in `backend/src/core/ports/drop_repository.py`
-- [ ] T036 [US3] Implement PostgresPlantRepository in `backend/src/infrastructure/database/repositories/plant_repository.py`
-- [ ] T037 [P] [US3] Implement PostgresDropRepository in `backend/src/infrastructure/database/repositories/drop_repository.py`
-- [ ] T038 [US3] Create SQLAlchemy Plant model in `backend/src/infrastructure/database/models/plant.py`
-- [ ] T039 [P] [US3] Create SQLAlchemy Drop model in `backend/src/infrastructure/database/models/drop.py`
-- [ ] T040 [US3] Create Alembic migration for Plant + Drop tables with indexes (`idx_plant_user`, `idx_drop_plant`, `idx_drop_github_event`, `idx_drop_created_at`)
+- [X] T036 [US3] Implement PostgresPlantRepository in `backend/src/infrastructure/database/repositories/plant_repository.py`
+- [X] T037 [P] [US3] Implement PostgresDropRepository in `backend/src/infrastructure/database/repositories/drop_repository.py`
+- [X] T038 [US3] Create SQLAlchemy Plant model in `backend/src/infrastructure/database/models/plant.py`
+- [X] T039 [P] [US3] Create SQLAlchemy Drop model in `backend/src/infrastructure/database/models/drop.py`
+- [X] T040 [US3] Create Alembic migration for Plant + Drop tables with indexes (`idx_plant_user`, `idx_drop_plant`, `idx_drop_github_event`, `idx_drop_created_at`)
 - [X] T041 [US3] Create webhook signature verification in `backend/src/infrastructure/github/webhook_verification.py` (HMAC-SHA256)
 - [X] T042 [US3] Create Redis queue adapter in `backend/src/infrastructure/queue/redis_queue.py` (producer: enqueue event, consumer: dequeue + process)
-- [ ] T043 [US3] Create GitHub API client in `backend/src/infrastructure/github/github_client.py` for fetching commit history (paginated, rate-limited)
+- [X] T043 [US3] Create GitHub API client in `backend/src/infrastructure/github/github_client.py` for fetching commit history (paginated, rate-limited)
 - [X] T044 [US3] Create webhook schemas in `backend/src/api/schemas/webhooks.py` (WebhookResponse)
 - [X] T045 [US3] Create webhook router at `backend/src/api/routes/webhooks.py`:
   - `POST /api/webhooks/github` — verify signature → enqueue to Redis → return 202
-- [ ] T046 [US3] Create arq background worker at `backend/src/worker.py` that:
+- [X] T046 [US3] Create arq background worker at `backend/src/worker.py` that:
   - Consumes webhook events from Redis
   - Calls GitHub API for commit details
   - Persists Drop record (idempotent via `github_event_id`)
   - Calls PlantGrowthService to recalculate stage
   - Publishes stage transition event to Redis pub/sub if changed
-- [ ] T047 [US3] Create Pydantic dashboard schemas in `backend/src/api/schemas/dashboard.py` (DashboardResponse, PlantStateResponse, DropHistoryResponse)
-- [ ] T048 [US3] Create dashboard router at `backend/src/api/routes/dashboard.py`:
+- [X] T047 [US3] Create Pydantic dashboard schemas in `backend/src/api/schemas/dashboard.py` (DashboardResponse, PlantStateResponse, DropHistoryResponse)
+- [X] T048 [US3] Create dashboard router at `backend/src/api/routes/dashboard.py`:
   - `GET /api/dashboard` — current plant state + drop counter + recent drops + progress
   - `GET /api/dashboard/history` — paginated drop history with cursor
 
@@ -155,15 +155,15 @@ description: "Task list for GitHub Plant Gamification feature"
 
 **Independent Test**: User sees 4 plant cards, selects one, dashboard loads with plant as seed.
 
-- [ ] T049 [P] [US2] Create Pydantic plant schemas in `backend/src/api/schemas/plants.py` (PlantTypeResponse, PlantSelectRequest, PlantResponse)
-- [ ] T050 [US2] Create plants router at `backend/src/api/routes/plants.py`:
+- [X] T049 [P] [US2] Create Pydantic plant schemas in `backend/src/api/schemas/plants.py` (PlantTypeResponse, PlantSelectRequest, PlantResponse)
+- [X] T050 [US2] Create plants router at `backend/src/api/routes/plants.py`:
   - `GET /api/plants/types` — list available plant types with preview info
   - `POST /api/plants/select` — create plant for authenticated user
   - `GET /api/plants/mine` — get current user's plant state
-- [ ] T051 [US2] Create frontend API client for plants in `frontend/src/services/plantService.ts`
-- [ ] T052 [US2] Create PlantSelectPage in `frontend/src/pages/PlantSelectPage.vue` with 4 plant cards
-- [ ] T053 [US2] Create Pinia plant store in `frontend/src/stores/plantStore.ts` (set type, fetch state, watch for changes)
-- [ ] T054 [US2] Create TypeScript interfaces in `frontend/src/types/plant.ts` matching backend schemas
+- [X] T051 [US2] Create frontend API client for plants in `frontend/src/services/plantService.ts`
+- [X] T052 [US2] Create PlantSelectPage in `frontend/src/pages/PlantSelectPage.vue` with 4 plant cards
+- [X] T053 [US2] Create Pinia plant store in `frontend/src/stores/plantStore.ts` (set type, fetch state, watch for changes)
+- [X] T054 [US2] Create TypeScript interfaces in `frontend/src/types/plant.ts` matching backend schemas
 
 **Checkpoint**: After GitHub auth, user sees 4 plant options → selects one → redirected to dashboard with seed.
 
@@ -175,18 +175,18 @@ description: "Task list for GitHub Plant Gamification feature"
 
 **Independent Test**: Authenticated user navigates to dashboard, sees plant visual, drop counter, progress bar, and chronological drop list.
 
-- [ ] T055 [US4] Create base PlantCanvas component in `frontend/src/components/plant/PlantCanvas.vue` that renders an SVG based on plant type + stage
-- [ ] T056 [P] [US4] Create Cactus SVG assets (5 stages) in `frontend/src/assets/plants/cactus/` (seed.svg, sprout.svg, young.svg, mature.svg, bloomed.svg)
-- [ ] T057 [P] [US4] Create Bonsai SVG assets (5 stages) in `frontend/src/assets/plants/bonsai/`
-- [ ] T058 [P] [US4] Create Cannabis SVG assets (5 stages) in `frontend/src/assets/plants/cannabis/`
-- [ ] T059 [P] [US4] Create Fruit SVG assets (5 stages) in `frontend/src/assets/plants/fruit/`
-- [ ] T060 [US4] Create DropCounter component in `frontend/src/components/dashboard/DropCounter.vue`
-- [ ] T061 [US4] Create ProgressBar component in `frontend/src/components/dashboard/ProgressBar.vue` (shows drops to next stage + percentage)
-- [ ] T062 [US4] Create DropHistory component in `frontend/src/components/dashboard/DropHistory.vue` (chronological list with date + repo + event type)
-- [ ] T063 [US4] Create DashboardPage in `frontend/src/pages/DashboardPage.vue` composing plant + counter + progress + history
-- [ ] T064 [US4] Create frontend API client for dashboard in `frontend/src/services/dashboardService.ts`
-- [ ] T065 [US4] Create Pinia drops store in `frontend/src/stores/dropsStore.ts` (recent drops, paginated history)
-- [ ] T066 [US4] Add dark mode theme (default) in `frontend/src/assets/styles/main.css` with CSS custom properties
+- [X] T055 [US4] Create base PlantCanvas component in `frontend/src/components/plant/PlantCanvas.vue` that renders an SVG based on plant type + stage
+- [X] T056 [P] [US4] Create Cactus SVG assets (5 stages) in `frontend/src/assets/plants/cactus/` (seed.svg, sprout.svg, young.svg, mature.svg, bloomed.svg)
+- [X] T057 [P] [US4] Create Bonsai SVG assets (5 stages) in `frontend/src/assets/plants/bonsai/`
+- [X] T058 [P] [US4] Create Cannabis SVG assets (5 stages) in `frontend/src/assets/plants/cannabis/`
+- [X] T059 [P] [US4] Create Fruit SVG assets (5 stages) in `frontend/src/assets/plants/fruit/`
+- [X] T060 [US4] Create DropCounter component in `frontend/src/components/dashboard/DropCounter.vue`
+- [X] T061 [US4] Create ProgressBar component in `frontend/src/components/dashboard/ProgressBar.vue` (shows drops to next stage + percentage)
+- [X] T062 [US4] Create DropHistory component in `frontend/src/components/dashboard/DropHistory.vue` (chronological list with date + repo + event type)
+- [X] T063 [US4] Create DashboardPage in `frontend/src/pages/DashboardPage.vue` composing plant + counter + progress + history
+- [X] T064 [US4] Create frontend API client for dashboard in `frontend/src/services/dashboardService.ts`
+- [X] T065 [US4] Create Pinia drops store in `frontend/src/stores/dropsStore.ts` (recent drops, paginated history)
+- [X] T066 [US4] Add dark mode theme (default) in `frontend/src/assets/styles/main.css` with CSS custom properties
 
 **Checkpoint**: Dashboard shows plant at correct stage, drop counter matches API, progress bar shows advancement, history lists recent drops.
 

@@ -33,6 +33,10 @@ class UserRepository(ABC):
         ...
 
     @abstractmethod
+    async def get_by_username(self, username: str) -> UserRecord | None:
+        ...
+
+    @abstractmethod
     async def get_by_id(self, user_id: UUID) -> UserRecord | None:
         ...
 
