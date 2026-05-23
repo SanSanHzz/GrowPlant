@@ -20,7 +20,7 @@ class DropModel(Base):
     event_type: Mapped[str] = mapped_column(String(50), nullable=False)
     source_repo: Mapped[str] = mapped_column(String(255), nullable=False)
     github_event_id: Mapped[str] = mapped_column(
-        String(64), unique=True, nullable=False
+        String(255), unique=True, nullable=False
     )
     committed_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False
