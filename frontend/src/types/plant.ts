@@ -12,6 +12,8 @@ export interface Plant {
   current_stage_name: string;
   total_drops: number;
   drops_to_next_stage: number;
+  name: string | null;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -52,4 +54,9 @@ export interface DropHistory {
   next_cursor: string | null;
   has_more: boolean;
   total_drops: number;
+}
+
+export interface PlantList {
+  plants: Plant[];
+  active_plant_id: string | null;
 }

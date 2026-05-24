@@ -1,4 +1,4 @@
-import type { PlantType, Plant } from "@/types/plant";
+import type { PlantType, Plant, PlantList } from "@/types/plant";
 
 const API = "/api";
 
@@ -25,8 +25,36 @@ export async function selectPlant(plantType: string): Promise<Plant | null> {
   return res.json();
 }
 
-export async function fetchMyPlant(): Promise<Plant | null> {
+export async function fetchMyPlants(): Promise<PlantList | null> {
   const res = await fetch(`${API}/plants/mine`, { headers: headers() });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function renamePlant(plantId: string, name: string): Promise<Plant | null> {
+  const res = await fetch(`${API}/plants/${plantId}/name`, {
+    method: "PATCH",
+    headers: headers(),
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function deletePlant(plantId: string): Promise<boolean> {
+  const res = await fetch(`${API}/plants/${plantId}`, {
+    method: "DELETE",
+    headers: headers(),
+  });
+  return res.ok;
+}
+
+export async function activatePlant(plantId: string): Promise<Plant | null> {
+  const res = await fetch(`${API}/plants/activate`, {
+    method: "POST",
+    headers: headers(),
+    body: JSON.stringify({ plant_id: plantId }),
+  });
   if (!res.ok) return null;
   return res.json();
 }

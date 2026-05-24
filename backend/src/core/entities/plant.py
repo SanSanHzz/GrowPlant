@@ -35,5 +35,7 @@ class Plant:
     current_stage: GrowthStage
     total_drops: int
     drops_in_stage: int
+    name: str | None
+    is_active: bool
     created_at: object
     updated_at: object

@@ -55,7 +55,7 @@ async def process_event(event_data: dict) -> None:
         if not user:
             return
 
-        plant = await plant_repo.get_by_user_id(user.id)
+        plant = await plant_repo.get_active(user.id)
         if not plant:
             return
 

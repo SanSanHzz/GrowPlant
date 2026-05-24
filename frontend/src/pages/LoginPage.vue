@@ -1,5 +1,8 @@
 <template>
   <div class="login-page">
+    <div class="top-bar">
+      <ThemeToggle />
+    </div>
     <div class="card" v-if="!checking">
       <h1 class="title">GrowPlant</h1>
       <p class="subtitle">Your GitHub contributions come to life</p>
@@ -12,12 +15,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
 import LoginButton from "@/components/auth/LoginButton.vue";
-import { useUserStore } from "@/stores/userStore";
+import ThemeToggle from "@/components/ThemeToggle.vue";
+import { fetchMyPlants } from "@/services/plantService";
 
-const router = useRouter();
-const userStore = useUserStore();
 const checking = ref(false);
 const error = ref("");
 
@@ -34,12 +35,19 @@ onMounted(async () => {
   if (token) {
     localStorage.setItem("session_token", token);
     checking.value = true;
-    window.location.href = "/select-plant";
+    const plantsData = await fetchMyPlants();
+    const plant = plantsData?.active_plant_id;
+    window.location.href = plant ? "/dashboard" : "/select-plant";
   }
 });
 </script>
 
 <style scoped>
+.top-bar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
 .login-page {
   display: flex;
   align-items: center;

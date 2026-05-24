@@ -1,5 +1,8 @@
 <template>
   <div class="select-page">
+    <div class="top-bar">
+      <ThemeToggle />
+    </div>
     <h1 class="title">Choose your plant</h1>
     <p class="subtitle">Each type grows differently based on your commits</p>
     <div class="grid">
@@ -25,6 +28,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { usePlantStore } from "@/stores/plantStore";
+import ThemeToggle from "@/components/ThemeToggle.vue";
 
 const plantStore = usePlantStore();
 const router = useRouter();
@@ -52,12 +56,18 @@ async function confirm() {
 </script>
 
 <style scoped>
+.top-bar {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
 .select-page {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 4rem 2rem;
   min-height: 100vh;
+  position: relative;
 }
 .title { font-size: 2rem; margin-bottom: 0.5rem; }
 .subtitle { color: var(--text-secondary); margin-bottom: 2rem; }
@@ -79,6 +89,7 @@ async function confirm() {
 }
 .card:hover { border-color: var(--accent); }
 .card.selected { border-color: var(--accent); background: #1a3a1a; }
+[data-theme="light"] .card.selected { background: #dcfce7; }
 .preview { font-size: 3rem; margin-bottom: 0.75rem; }
 .confirm-btn {
   margin-top: 2rem;

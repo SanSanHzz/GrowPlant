@@ -5,12 +5,19 @@
         <h1>Your {{ plantType }}</h1>
         <p class="stage-name">{{ store.plant?.current_stage_name || "seed" }}</p>
       </div>
-      <UserMenu :user="userStore.user" @logout="handleLogout" />
+      <div class="header-right">
+        <ThemeToggle />
+        <UserMenu :user="userStore.user" @logout="handleLogout" />
+      </div>
     </header>
 
-    <div v-if="!store.plant" class="loading">Loading your plant...</div>
+    <div v-if="!store.plant && !store.loading" class="empty-state">
+      <p>No active plant. Select one below.</p>
+    </div>
 
-    <template v-else>
+    <div v-if="store.loading && !store.plant" class="loading">Loading your plant...</div>
+
+    <template v-if="store.plant">
       <div class="main-area">
         <div class="plant-wrapper">
           <WaterDrop :trigger="dropTrigger" @done="dropTrigger = 0" />
@@ -34,6 +41,20 @@
 
       <DropHistory :drops="store.recentDrops" />
     </template>
+
+    <MyPlants
+      :plants="plantStore.plants"
+      @add="showModal = true"
+      @switch="handleSwitchPlant"
+      @refresh="handleRefresh"
+    />
+
+    <AddPlantModal
+      v-if="showModal"
+      :plant-types="plantStore.plantTypes"
+      @close="showModal = false"
+      @select="handleAddPlant"
+    />
   </div>
 </template>
 
@@ -50,7 +71,10 @@ import StageTransition from "@/components/plant/StageTransition.vue";
 import DropCounter from "@/components/dashboard/DropCounter.vue";
 import ProgressBar from "@/components/dashboard/ProgressBar.vue";
 import DropHistory from "@/components/dashboard/DropHistory.vue";
+import MyPlants from "@/components/dashboard/MyPlants.vue";
+import AddPlantModal from "@/components/dashboard/AddPlantModal.vue";
 import UserMenu from "@/components/auth/UserMenu.vue";
+import ThemeToggle from "@/components/ThemeToggle.vue";
 
 const userStore = useUserStore();
 const store = useDropsStore();
@@ -59,6 +83,7 @@ const router = useRouter();
 
 const dropTrigger = ref(0);
 const stageTrigger = ref(0);
+const showModal = ref(false);
 let disconnectStream: (() => void) | null = null;
 
 const plantType = computed(() => {
@@ -70,6 +95,7 @@ const plantType = computed(() => {
 
 onMounted(async () => {
   plantStore.loadPlantTypes();
+  await plantStore.loadPlants();
   await store.refresh();
 
   disconnectStream = await connectEventStream({
@@ -90,9 +116,26 @@ onUnmounted(() => {
   disconnectStream?.();
 });
 
-function handleLogout() {
-  userStore.logout();
+async function handleLogout() {
+  await userStore.logout();
   router.push("/");
+}
+
+async function handleSwitchPlant(plantId: string) {
+  await plantStore.switchActive(plantId);
+  await store.refresh();
+}
+
+async function handleRefresh() {
+  await plantStore.loadPlants();
+  await store.refresh();
+}
+
+async function handleAddPlant(plantType: string) {
+  await plantStore.choosePlant(plantType);
+  showModal.value = false;
+  await plantStore.loadPlants();
+  await store.refresh();
 }
 </script>
 
@@ -109,12 +152,17 @@ function handleLogout() {
   align-items: flex-start;
   margin-bottom: 2rem;
 }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
 .stage-name {
   color: var(--accent);
   text-transform: capitalize;
   font-size: 1.25rem;
 }
-.loading {
+.loading, .empty-state {
   text-align: center;
   padding: 4rem;
   color: var(--text-secondary);

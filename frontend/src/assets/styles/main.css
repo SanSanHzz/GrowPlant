@@ -11,6 +11,19 @@
   --warning: #d29922;
 }
 
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f8fa;
+  --bg-card: #ffffff;
+  --text-primary: #1f2328;
+  --text-secondary: #656d76;
+  --accent: #1a7f37;
+  --accent-hover: #2da04e;
+  --border: #d0d7de;
+  --danger: #cf222e;
+  --warning: #9a6700;
+}
+
 *,
 *::before,
 *::after {
@@ -29,6 +42,7 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 a {

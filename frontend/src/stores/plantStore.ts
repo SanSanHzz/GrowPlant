@@ -3,30 +3,60 @@ import { ref } from "vue";
 import {
   fetchPlantTypes,
   selectPlant,
-  fetchMyPlant,
+  fetchMyPlants,
+  activatePlant,
 } from "@/services/plantService";
 import type { PlantType, Plant } from "@/types/plant";
 
 export const usePlantStore = defineStore("plant", () => {
   const plantTypes = ref<PlantType[]>([]);
-  const plant = ref<Plant | null>(null);
+  const plants = ref<Plant[]>([]);
+  const activePlant = ref<Plant | null>(null);
   const loading = ref(false);
 
   async function loadPlantTypes() {
     plantTypes.value = await fetchPlantTypes();
   }
 
-  async function choosePlant(plantType: string) {
-    const result = await selectPlant(plantType);
-    if (result) plant.value = result;
-    return result;
-  }
-
-  async function refreshPlant() {
+  async function loadPlants() {
     loading.value = true;
-    plant.value = await fetchMyPlant();
+    const data = await fetchMyPlants();
+    if (data) {
+      plants.value = data.plants;
+      activePlant.value =
+        data.plants.find((p) => p.id === data.active_plant_id) || null;
+    }
     loading.value = false;
   }
 
-  return { plantTypes, plant, loading, loadPlantTypes, choosePlant, refreshPlant };
+  async function choosePlant(plantType: string) {
+    const result = await selectPlant(plantType);
+    if (result) {
+      await loadPlants();
+    }
+    return result;
+  }
+
+  async function switchActive(plantId: string) {
+    const result = await activatePlant(plantId);
+    if (result) {
+      activePlant.value = result;
+      plants.value = plants.value.map((p) => ({
+        ...p,
+        is_active: p.id === plantId,
+      }));
+    }
+    return result;
+  }
+
+  return {
+    plantTypes,
+    plants,
+    activePlant,
+    loading,
+    loadPlantTypes,
+    loadPlants,
+    choosePlant,
+    switchActive,
+  };
 });

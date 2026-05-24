@@ -71,7 +71,7 @@ async def get_dashboard(
 
     async with async_session_factory() as session:
         plant_repo = PostgresPlantRepository(session)
-        plant = await plant_repo.get_by_user_id(uid)
+        plant = await plant_repo.get_active(uid)
 
         recent_drops = []
         total_drops_count = 0
@@ -118,6 +118,7 @@ async def get_dashboard(
 @router.get("/history", response_model=DropHistoryResponse)
 async def get_drop_history(
     user_id: str = Depends(require_auth),
+    plant_id: str | None = Query(None),
     cursor: str | None = Query(None),
     limit: int = Query(50, ge=1, le=100),
 ):
@@ -127,8 +128,12 @@ async def get_drop_history(
 
     async with async_session_factory() as session:
         plant_repo = PostgresPlantRepository(session)
-        plant = await plant_repo.get_by_user_id(uid)
-        if not plant:
+        if plant_id:
+            plant = await plant_repo.get_by_id(UUID(plant_id))
+        else:
+            plant = await plant_repo.get_active(uid)
+
+        if not plant or plant.user_id != uid:
             return DropHistoryResponse(
                 drops=[], next_cursor=None, has_more=False, total_drops=0
             )
