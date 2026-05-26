@@ -1,10 +1,8 @@
 <template>
-  <div class="rain-container">
-    <div v-for="d in drops" :key="d.key" class="drop" :style="d.style">
-      <svg width="8" height="14" viewBox="0 0 8 14">
-        <ellipse cx="4" cy="10" rx="3.5" ry="5" fill="#4FC3F7" opacity="0.8" />
-        <ellipse cx="4" cy="6" rx="2.5" ry="3.5" fill="#81D4FA" opacity="0.6" />
-      </svg>
+  <div v-if="active" class="rain-overlay">
+    <div class="cloud"></div>
+    <div class="drops">
+      <span v-for="i in 12" :key="i" class="drop" :style="dropStyle(i)"></span>
     </div>
   </div>
 </template>
@@ -15,93 +13,82 @@ import { ref, watch, onUnmounted } from "vue";
 const props = defineProps<{ trigger: number }>();
 const emit = defineEmits<{ done: [] }>();
 
-interface DropData {
-  key: number;
-  style: Record<string, string>;
-}
+const active = ref(false);
+let timeout: ReturnType<typeof setTimeout> | null = null;
 
-const drops = ref<DropData[]>([]);
-let interval: ReturnType<typeof setInterval> | null = null;
-
-function createDrop(): DropData {
-  const id = Date.now() + Math.random();
-  const left = Math.random() * 80 + 10; // 10% to 90%
-  const delay = Math.random() * 0.5;
+function dropStyle(i: number) {
   return {
-    key: id,
-    style: {
-      left: `${left}%`,
-      animation: `rainfall ${2 + Math.random() * 2}s linear infinite`,
-      animationDelay: `${delay}s`,
-      opacity: "0",
-    },
+    left: `${8 + (i * 8) % 90}%`,
+    animationDelay: `${i * 0.4}s`,
+    animationDuration: `${1.5 + (i % 3) * 0.5}s`,
   };
-}
-
-function startRain() {
-  const count = 30;
-  drops.value = Array.from({ length: count }, () => createDrop());
-
-  interval = setInterval(() => {
-    drops.value = drops.value.map(() => createDrop());
-  }, 3000);
-}
-
-function stopRain() {
-  if (interval) {
-    clearInterval(interval);
-    interval = null;
-  }
-  drops.value = [];
-  emit("done");
 }
 
 watch(
   () => props.trigger,
   (val) => {
     if (val === 0) return;
-    startRain();
-    setTimeout(() => {
-      stopRain();
+    if (timeout) clearTimeout(timeout);
+    active.value = true;
+    timeout = setTimeout(() => {
+      active.value = false;
+      emit("done");
     }, 300000);
   },
 );
 
 onUnmounted(() => {
-  stopRain();
+  if (timeout) clearTimeout(timeout);
 });
 </script>
 
 <style scoped>
-.rain-container {
+.rain-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 180px;
+  top: -20px;
+  left: -10px;
+  width: calc(100% + 20px);
+  height: 220px;
   overflow: hidden;
   pointer-events: none;
   z-index: 5;
 }
+.cloud {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 30px;
+  background: radial-gradient(ellipse, rgba(100,181,246,0.5) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: cloud-pulse 2s ease-in-out infinite;
+}
+.drops {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 100%;
+  height: 200px;
+}
 .drop {
   position: absolute;
-  top: -20px;
+  top: 0;
+  width: 8px;
+  height: 14px;
+  background: radial-gradient(ellipse at center, #64B5F6 0%, #2196F3 100%);
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  animation: fall linear infinite;
+  opacity: 0;
 }
-
-@keyframes rainfall {
-  0% {
-    opacity: 0;
-    transform: translateY(0);
-  }
-  10% {
-    opacity: 0.85;
-  }
-  90% {
-    opacity: 0.3;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(200px);
-  }
+@keyframes fall {
+  0%   { opacity: 0; transform: translateY(0); }
+  5%   { opacity: 0.8; }
+  90%  { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(200px); }
+}
+@keyframes cloud-pulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.15); }
 }
 </style>

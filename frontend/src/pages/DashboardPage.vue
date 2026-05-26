@@ -101,12 +101,11 @@ const subStage = computed(() => {
   const stage = store.plant.current_stage;
   if (stage >= 5) return 2;
   const needed = stageThresholds[stage] || 1;
-  // drops_in_stage / (thresholds_diff) * 3
   const prevThreshold = stage === 1 ? 0 : stageThresholds[stage - 1];
   const range = needed - prevThreshold;
   if (range <= 0) return 2;
   const progress = store.plant.total_drops - prevThreshold;
-  return Math.min(2, Math.floor((progress * 3) / range));
+  return Math.min(2, Math.max(0, (progress / range) * 2));
 });
 
 onMounted(async () => {

@@ -4,53 +4,67 @@ export async function connectEventStream(callbacks: {
   onDropReceived?: EventCallback;
   onStageAdvanced?: EventCallback;
 }): Promise<() => void> {
-  const token = localStorage.getItem("session_token");
-  if (!token) return () => {};
+  let controller = new AbortController();
+  let stopped = false;
 
-  const controller = new AbortController();
+  async function connect() {
+    const token = localStorage.getItem("session_token");
+    if (!token) return;
 
-  try {
-    const response = await fetch("/api/events/stream", {
-      headers: { Authorization: `Bearer ${token}` },
-      signal: controller.signal,
-    });
+    while (!stopped) {
+      try {
+        const response = await fetch("/api/events/stream", {
+          headers: { Authorization: `Bearer ${token}` },
+          signal: controller.signal,
+        });
 
-    if (!response.ok) return () => {};
-    if (!response.body) return () => {};
+        if (!response.ok || !response.body) {
+          await delay(5000);
+          continue;
+        }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
 
-    async function read() {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        while (!stopped) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() || "";
 
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          try {
-            const { event, data } = JSON.parse(line.slice(6));
-            if (event === "drop_received" && callbacks.onDropReceived) {
-              callbacks.onDropReceived(data);
-            } else if (event === "stage_advanced" && callbacks.onStageAdvanced) {
-              callbacks.onStageAdvanced(data);
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            try {
+              const { event, data } = JSON.parse(line.slice(6));
+              if (event === "drop_received" && callbacks.onDropReceived) {
+                callbacks.onDropReceived(data);
+              } else if (event === "stage_advanced" && callbacks.onStageAdvanced) {
+                callbacks.onStageAdvanced(data);
+              }
+            } catch {
+              // ignore parse errors
             }
-          } catch {
-            // ignore parse errors
           }
         }
+      } catch {
+        // connection error, retry
       }
-    }
 
-    read().catch(() => {});
-  } catch {
-    // connection error
+      if (!stopped) await delay(5000);
+    }
   }
 
-  return () => controller.abort();
+  connect();
+
+  return () => {
+    stopped = true;
+    controller.abort();
+  };
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
