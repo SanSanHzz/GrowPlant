@@ -63,7 +63,7 @@ watch(
     startRain();
     setTimeout(() => {
       stopRain();
-    }, 60000);
+    }, 300000);
   },
 );
 
