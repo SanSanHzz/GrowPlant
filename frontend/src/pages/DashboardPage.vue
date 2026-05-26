@@ -24,6 +24,7 @@
           <StageTransition :trigger="stageTrigger" @done="stageTrigger = 0" />
           <PlantCanvas
             :stage="store.plant.current_stage"
+            :sub-stage="subStage"
             :max-stage="store.plant.max_stage_reached"
           />
         </div>
@@ -91,6 +92,21 @@ const plantType = computed(() => {
     (t) => t.id === store.plant?.plant_type,
   );
   return pt?.name || store.plant?.plant_type || "Plant";
+});
+
+const stageThresholds: Record<number, number> = { 1: 5, 2: 15, 3: 30, 4: 50, 5: 0 };
+
+const subStage = computed(() => {
+  if (!store.plant) return 0;
+  const stage = store.plant.current_stage;
+  if (stage >= 5) return 2;
+  const needed = stageThresholds[stage] || 1;
+  // drops_in_stage / (thresholds_diff) * 3
+  const prevThreshold = stage === 1 ? 0 : stageThresholds[stage - 1];
+  const range = needed - prevThreshold;
+  if (range <= 0) return 2;
+  const progress = store.plant.total_drops - prevThreshold;
+  return Math.min(2, Math.floor((progress * 3) / range));
 });
 
 onMounted(async () => {
